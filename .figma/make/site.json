@@ -1,0 +1,8 @@
+{
+  "title": "Button Gallery",
+  "description": "A React playground for buttons with personality.",
+  "language": "en",
+  "icons": {
+    "icon": "/favicon.svg"
+  }
+}
