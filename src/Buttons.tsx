@@ -157,3 +157,9 @@ export function Minimal() {
   return <button className="demo-button minimal" onClick={() => setCount(count + 1)}>{count ? `One more thing (${count})` : 'Less, but better'}<span>↗</span></button>
 }
 // @end
+
+// @demo test9276
+export function Test9276() {
+  return <button className="demo-button test9276">Test 9276</button>
+}
+// @end
