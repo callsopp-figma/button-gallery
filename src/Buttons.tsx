@@ -7,6 +7,12 @@ export function Classic() {
 }
 // @end
 
+// @demo test-5719
+export function Test5719() {
+  return <button className="demo-button test-5719">Test 5719</button>
+}
+// @end
+
 // @demo lift
 export function Lift() {
   const [count, setCount] = useState(0)

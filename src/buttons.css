@@ -12,6 +12,13 @@
 .classic span { margin-left: 7px; font-size: 18px; }
 /* @end */
 
+/* @demo test-5719 */
+.test-5719 { min-height: 48px; padding-inline: 24px; border-radius: 8px; color: #fff; background: #dc2626; font-size: 16px; font-weight: 600; box-shadow: 0 1px 2px #00000012; }
+.test-5719:hover { background: #b91c1c; }
+.test-5719:active { background: #991b1b; transform: translateY(1px); }
+.test-5719:focus-visible { outline-color: #dc2626; }
+/* @end */
+
 /* @demo lift */
 .lift { background: #f5a27f; color: #543327; border: 1.5px solid #754d39; border-radius: 10px; box-shadow: 0 5px 0 #754d39; transform: translateY(-3px); }
 .lift:hover { background: #ffb392; transform: translateY(-5px); box-shadow: 0 7px 0 #754d39; }
