@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-npm run dev
+exec npm exec -- vite --port "$PORT" --host 0.0.0.0
