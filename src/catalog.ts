@@ -6,6 +6,7 @@ export const categories = ['All buttons', 'Minimal', 'Playful', 'Motion', 'Utili
 export type Category = typeof categories[number]
 export const demos = [
   { id: 'classic', name: 'The everyday', category: 'Minimal', feel: 'Clean & confident', stage: 'sage', Component: Buttons.Classic },
+  { id: 'test-8246', name: 'Test 8246', category: 'Minimal', feel: 'Bold · Red', stage: 'cream', Component: Buttons.Test8246 },
   { id: 'lift', name: 'A little push', category: 'Playful', feel: 'Tactile · 3D press', stage: 'peach', Component: Buttons.Lift },
   { id: 'glow', name: 'After hours', category: 'Motion', feel: 'Soft neon · Glow', stage: 'night', Component: Buttons.Glow },
   { id: 'slide', name: 'On the move', category: 'Motion', feel: 'Directional · Hover fill', stage: 'cream', Component: Buttons.Slide },
