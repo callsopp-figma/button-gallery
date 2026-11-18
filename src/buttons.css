@@ -141,3 +141,10 @@
 .minimal > span { transition: transform .3s; font-size: 20px; }
 .minimal:hover > span { transform: translate(3px,-3px); }
 /* @end */
+
+/* @demo test-2951 */
+.test-2951 { border-radius: 8px; color: #fff; background: #dc2626; box-shadow: 0 2px 2px #7f1d1d18; }
+.test-2951:hover { background: #b91c1c; box-shadow: 0 5px 12px #7f1d1d26; transform: translateY(-2px); }
+.test-2951:active { background: #991b1b; transform: translateY(1px); }
+/* @end */
+
