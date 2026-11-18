@@ -1,0 +1,9 @@
+{
+  "installOn": [
+    "package.json",
+    "package-lock.json"
+  ],
+  "restartOn": [
+    "vite.config.ts"
+  ]
+}

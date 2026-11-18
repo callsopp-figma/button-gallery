@@ -1,6 +1,6 @@
 # Button Gallery
 
-A React playground for the small details that make interfaces feel good. Eighteen original buttons, each with a different look and interaction.
+A React playground for the small details that make interfaces feel good. Nineteen original buttons, each with a different look and interaction.
 
 ## Run locally
 
