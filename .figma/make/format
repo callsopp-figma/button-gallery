@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if npm run | grep -q '^  format$'; then
+  npm run format -- "$@"
+else
+  echo "No formatter is configured for this repository."
+fi
