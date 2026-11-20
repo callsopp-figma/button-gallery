@@ -5,6 +5,7 @@ import rawStyles from './buttons.css?raw'
 export const categories = ['All buttons', 'Minimal', 'Playful', 'Motion', 'Utility'] as const
 export type Category = typeof categories[number]
 export const demos = [
+  { id: 'test-68241', name: 'Test 68241', category: 'Minimal', feel: 'Bold · Red', stage: 'cream', Component: Buttons.Test68241 },
   { id: 'classic', name: 'The everyday', category: 'Minimal', feel: 'Clean & confident', stage: 'sage', Component: Buttons.Classic },
   { id: 'lift', name: 'A little push', category: 'Playful', feel: 'Tactile · 3D press', stage: 'peach', Component: Buttons.Lift },
   { id: 'glow', name: 'After hours', category: 'Motion', feel: 'Soft neon · Glow', stage: 'night', Component: Buttons.Glow },
