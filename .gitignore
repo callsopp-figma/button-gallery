@@ -1,5 +1,19 @@
 node_modules/
 dist/
-*.local
-.DS_Store
+build/
+.cache/
+.env*
+.vite/
+vite.config.*.timestamp-*
 *.tsbuildinfo
+*-debug.log*
+logs/
+*.log
+.claude-replay.*
+.tmp-*
+.DS_Store
+/.figma/design-context/
+
+# Platform-managed agent state, not project source.
+/.plugins/
+/.opencode-skills/
