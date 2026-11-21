@@ -1,0 +1,10 @@
+{
+  "description": "Play a daily word puzzle by guessing the hidden word in six tries, with color-coded clues that help sharpen vocabulary and deductive skills.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

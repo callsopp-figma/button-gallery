@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
-import App from './App'
+import App from './ButtonGallery'
 import { Hold, Like, Loading, Split, Toggle } from './Buttons'
 import { demos, getSource } from './catalog'
 

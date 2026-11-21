@@ -1,3 +1,13 @@
+# Wordly
+
+The primary app is the preserved Figma Make Wordle experience. The original Button Gallery repository content remains available in `src/ButtonGallery.tsx`, `src/Buttons.tsx`, `src/catalog.ts`, and their existing styles and tests.
+
+## Make development
+
+This repository uses npm. Figma Make lifecycle scripts live in `.figma/make/`; the managed dev server forwards the injected `PORT` to Vite.
+
+---
+
 # Button Gallery
 
 A React playground for the small details that make interfaces feel good. Eighteen original buttons, each with a different look and interaction.

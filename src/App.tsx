@@ -1,77 +1,277 @@
-import { useEffect, useRef, useState } from 'react'
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Check, CheckCheck, Code2, Copy, Github, Heart, LayoutGrid, List, Moon, MousePointer2, RotateCcw, Search, SlidersHorizontal, Sparkles, Sun, X } from 'lucide-react'
-import { categories, demos, getSource } from './catalog'
-import type { Category, Demo } from './catalog'
-import './buttons.css'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
-function readSaved(): string[] {
-  try { const value: unknown = JSON.parse(localStorage.getItem('button-gallery-saved') || '[]'); return Array.isArray(value) ? value.filter((id): id is string => typeof id === 'string') : [] } catch { return [] }
+const WORDS = [
+  'APPLE',
+  'BEACH',
+  'BLOOM',
+  'BRAVE',
+  'BRICK',
+  'CHARM',
+  'CLOUD',
+  'CRANE',
+  'DREAM',
+  'FLAME',
+  'FROST',
+  'GHOST',
+  'GRAPE',
+  'HEART',
+  'LIGHT',
+  'MAPLE',
+  'NIGHT',
+  'OCEAN',
+  'OLIVE',
+  'PEARL',
+  'PILOT',
+  'PLANT',
+  'PRIDE',
+  'ROBIN',
+  'SHORE',
+  'SMILE',
+  'SOLAR',
+  'STONE',
+  'TIGER',
+  'TRAIL',
+  'WATER',
+]
+
+const KEY_ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM']
+const MAX_GUESSES = 6
+
+type LetterState = 'correct' | 'present' | 'absent' | 'empty'
+
+function getDailyWord() {
+  const days = Math.floor(Date.now() / 86_400_000)
+  return WORDS[days % WORDS.length]
 }
 
-function Inspector({ demo, close }: { demo: Demo; close: () => void }) {
-  const [tab, setTab] = useState<'component' | 'css'>('component')
-  const [copied, setCopied] = useState(false)
-  const [copyError, setCopyError] = useState(false)
-  const [version, setVersion] = useState(0)
-  const dialog = useRef<HTMLDialogElement>(null)
-  const source = getSource(demo.id)
-  useEffect(() => { const node = dialog.current; node?.showModal(); return () => node?.close() }, [])
-  useEffect(() => { if (!copied) return; const timer = setTimeout(() => setCopied(false), 2000); return () => clearTimeout(timer) }, [copied])
-  async function copy() { try { await navigator.clipboard.writeText(source[tab]); setCopied(true); setCopyError(false) } catch { setCopied(false); setCopyError(true) } }
-  const Component = demo.Component
-  return <dialog ref={dialog} className="inspector" aria-labelledby="inspector-title" onCancel={close} onClick={event => { if (event.target === event.currentTarget) close() }}>
-    <div className="inspector-head"><div><span className="eyebrow">UNDER THE HOOD</span><h2 id="inspector-title">{demo.name}</h2></div><button className="icon-button" onClick={close} aria-label="Close inspector"><X size={20} /></button></div>
-    <div className={`inspector-preview stage ${demo.stage}`}><Component key={version} /><button className="preview-reset icon-button" aria-label="Reset button demo" onClick={() => setVersion(version + 1)}><RotateCcw size={15} /></button></div>
-    <div className="code-toolbar"><div className="code-tabs"><button className={tab === 'component' ? 'selected' : ''} onClick={() => setTab('component')}>React / TSX</button><button className={tab === 'css' ? 'selected' : ''} onClick={() => setTab('css')}>CSS</button></div><button className="copy-button" onClick={copy}>{copied ? <CheckCheck size={14} /> : <Copy size={14} />}{copied ? 'Copied!' : 'Copy code'}</button></div>
-    <pre tabIndex={0}><code>{source[tab]}</code></pre>
-    <p className="code-note" aria-live="polite">{copyError ? 'Clipboard access is unavailable. Select the code above and copy it manually.' : 'Copy the React component and CSS into your project. No extra dependencies needed.'}</p>
-  </dialog>
+function scoreGuess(guess: string, answer: string): LetterState[] {
+  const result: LetterState[] = Array(5).fill('absent')
+  const remaining: Record<string, number> = {}
+
+  for (let i = 0; i < 5; i += 1) {
+    if (guess[i] === answer[i]) result[i] = 'correct'
+    else remaining[answer[i]] = (remaining[answer[i]] || 0) + 1
+  }
+
+  for (let i = 0; i < 5; i += 1) {
+    if (result[i] === 'correct') continue
+    if (remaining[guess[i]] > 0) {
+      result[i] = 'present'
+      remaining[guess[i]] -= 1
+    }
+  }
+  return result
+}
+
+function Icon({ name }: { name: 'help' | 'refresh' }) {
+  if (name === 'refresh') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M20 11a8 8 0 1 0-2.34 5.66M20 5v6h-6" />
+      </svg>
+    )
+  }
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M9.8 9a2.3 2.3 0 1 1 3.7 1.83c-.94.69-1.5 1.1-1.5 2.17M12 17h.01" />
+    </svg>
+  )
+}
+
+function AppButton({
+  children,
+  className = '',
+  label,
+  onClick,
+}: {
+  children: React.ReactNode
+  className?: string
+  label?: string
+  onClick: () => void
+}) {
+  return (
+    <button aria-label={label} className={className} onClick={onClick} type="button">
+      {children}
+    </button>
+  )
 }
 
 export default function App() {
-  const [category, setCategory] = useState<Category>('All buttons')
-  const [query, setQuery] = useState('')
-  const [saved, setSaved] = useState(readSaved)
-  const [showSaved, setShowSaved] = useState(false)
-  const [layout, setLayout] = useState<'grid' | 'list'>('grid')
-  const [dark, setDark] = useState(false)
-  const [reducedMotion, setReducedMotion] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
-  const [settings, setSettings] = useState(false)
-  const [inspected, setInspected] = useState<Demo | null>(null)
-  const [reset, setReset] = useState(0)
-  const search = useRef<HTMLInputElement>(null)
-  const settingsRoot = useRef<HTMLDivElement>(null)
-  useEffect(() => { try { localStorage.setItem('button-gallery-saved', JSON.stringify(saved)) } catch { /* Bookmarks still work for this session. */ } }, [saved])
+  const [answer, setAnswer] = useState(getDailyWord)
+  const [guesses, setGuesses] = useState<string[]>([])
+  const [current, setCurrent] = useState('')
+  const [message, setMessage] = useState('Guess the hidden word in six tries.')
+  const [showHelp, setShowHelp] = useState(false)
+  const won = guesses.at(-1) === answer
+  const finished = won || guesses.length === MAX_GUESSES
+
+  const keyStates = useMemo(() => {
+    const states: Record<string, LetterState> = {}
+    const priority: Record<LetterState, number> = { empty: 0, absent: 1, present: 2, correct: 3 }
+    guesses.forEach((guess) =>
+      scoreGuess(guess, answer).forEach((state, index) => {
+        const letter = guess[index]
+        if (!states[letter] || priority[state] > priority[states[letter]]) states[letter] = state
+      }),
+    )
+    return states
+  }, [guesses, answer])
+
+  const handleKey = useCallback(
+    (key: string) => {
+      if (finished) return
+      if (key === 'ENTER') {
+        if (current.length !== 5) {
+          setMessage('Not enough letters')
+          return
+        }
+        const next = [...guesses, current]
+        setGuesses(next)
+        setCurrent('')
+        if (current === answer) setMessage('Beautiful. You found it!')
+        else if (next.length === MAX_GUESSES) setMessage(`The word was ${answer}`)
+        else setMessage('Keep going — use the clues.')
+        return
+      }
+      if (key === 'BACKSPACE' || key === 'DELETE') {
+        setCurrent((value) => value.slice(0, -1))
+        return
+      }
+      if (/^[A-Z]$/.test(key) && current.length < 5) setCurrent((value) => value + key)
+    },
+    [answer, current, finished, guesses],
+  )
+
   useEffect(() => {
-    function keydown(event: KeyboardEvent) {
-      if (event.key === '/' && !(event.target instanceof HTMLInputElement) && !(event.target instanceof HTMLTextAreaElement) && !document.querySelector('dialog[open]')) { event.preventDefault(); search.current?.focus() }
-      if (event.key === 'Escape') setSettings(false)
-    }
-    window.addEventListener('keydown', keydown)
-    return () => window.removeEventListener('keydown', keydown)
-  }, [])
-  useEffect(() => {
-    if (!settings) return
-    function outside(event: PointerEvent) { if (!settingsRoot.current?.contains(event.target as Node)) setSettings(false) }
-    document.addEventListener('pointerdown', outside)
-    return () => document.removeEventListener('pointerdown', outside)
-  }, [settings])
-  const filtered = demos.filter(demo => (category === 'All buttons' || category === demo.category) && (!showSaved || saved.includes(demo.id)) && `${demo.name} ${demo.category} ${demo.feel} ${demo.id}`.toLowerCase().includes(query.toLowerCase()))
-  const toggleSaved = (id: string) => setSaved(current => current.includes(id) ? current.filter(item => item !== id) : [...current, id])
-  return <div className={`app ${dark ? 'dark' : ''} ${reducedMotion ? 'reduce-motion' : ''}`}>
-    <header className="site-header"><a href="#" className="brand" aria-label="Button Gallery home" onClick={() => { setShowSaved(false); setCategory('All buttons'); setQuery('') }}><span className="brand-icon"><MousePointer2 size={19} strokeWidth={1.8} /></span>button<span className="brand-light">gallery</span><span className="beta">BETA</span></a><nav aria-label="Main navigation"><button className={!showSaved ? 'nav-link active' : 'nav-link'} onClick={() => setShowSaved(false)}>The collection</button><button className={showSaved ? 'nav-link active' : 'nav-link'} onClick={() => setShowSaved(true)}>Saved <span className="nav-count">{saved.length}</span></button><span className="nav-divider" /><a className="github-link" href="https://github.com/callsopp-figma/button-gallery" target="_blank" rel="noreferrer" aria-label="View source on GitHub"><Github size={18} /><span>GitHub</span><ArrowUpRight size={13} /></a><button className="icon-button theme-toggle" onClick={() => setDark(!dark)} aria-label={dark ? 'Switch to light theme' : 'Switch to dark theme'}>{dark ? <Sun size={17} /> : <Moon size={17} />}</button></nav></header>
-    <main>
-      <section className="hero"><div className="hero-copy"><div className="hero-kicker"><span className="status-dot" /> A COLLECTION MADE FOR CLICKING</div><h1>Small details.<br />Big <span className="feelings">feelings<svg viewBox="0 0 310 18" preserveAspectRatio="none" aria-hidden="true"><path d="M3 11C73 0 209 2 305 8M30 15C114 7 220 9 275 13" /></svg></span><span className="period">.</span></h1><p>A little gallery of buttons with a lot of personality.<br className="desktop-break" /> Explore the looks, feel the interactions, find your next favorite.</p><a className="explore-link" href="#collection">Go on, push some buttons <ArrowDown size={15} /></a></div><div className="hero-art" aria-hidden="true"><span className="art-orbit" /><span className="art-dot dot-one" /><span className="art-dot dot-two" /><span className="art-spark">✧</span><span className="art-label">a very good place to click</span><div className="art-button art-purple">just one more <Heart size={17} /></div><div className="art-button art-green">Click me <ArrowUpRight size={24} /></div><div className="art-button art-white"><span>✦</span> Feels good, right?</div><MousePointer2 className="art-cursor" fill="#2c3029" size={39} strokeWidth={1.2} /><span className="art-caption">100% clickable. 0% commitment.</span></div></section>
-      <section id="collection" className="collection" aria-label="Button collection"><div className="collection-top"><div className="collection-heading"><h2>{showSaved ? 'Your favorites' : 'The collection'}</h2><span className="total-badge">{showSaved ? saved.length : demos.length}</span><span className="collection-description">{showSaved ? 'The ones that clicked with you.' : 'Different by design. Delightful by default.'}</span></div><div className="collection-tools"><div className="live-label"><span /> Live playground</div><div className="settings-root" ref={settingsRoot}><button className={`icon-button settings-button ${settings ? 'selected' : ''}`} aria-label="Playground settings" aria-expanded={settings} onClick={() => setSettings(!settings)}><SlidersHorizontal size={16} /></button>{settings && <div className="settings-popover"><span className="eyebrow">PLAYGROUND</span><label><input type="checkbox" checked={reducedMotion} onChange={event => setReducedMotion(event.target.checked)} /> Reduce motion</label><button onClick={() => { setReset(reset + 1); setSettings(false) }}><RotateCcw size={14} /> Reset all demos</button></div>}</div></div></div>
-      <div className="filter-bar"><div className="category-tabs" aria-label="Filter by category">{categories.map(item => <button key={item} aria-pressed={category === item} className={category === item ? 'selected' : ''} onClick={() => setCategory(item)}>{item === 'All buttons' && <LayoutGrid size={13} />}{item}</button>)}</div><div className="filter-right"><div className="search-box"><Search size={15} /><input ref={search} aria-label="Search buttons" placeholder="Find your button…" value={query} onChange={event => setQuery(event.target.value)} />{query ? <button aria-label="Clear search" onClick={() => setQuery('')}><X size={13} /></button> : <kbd>/</kbd>}</div><div className="view-switch" aria-label="Gallery layout"><button aria-pressed={layout === 'grid'} className={layout === 'grid' ? 'selected' : ''} aria-label="Grid view" onClick={() => setLayout('grid')}><LayoutGrid size={15} /></button><button aria-pressed={layout === 'list'} className={layout === 'list' ? 'selected' : ''} aria-label="List view" onClick={() => setLayout('list')}><List size={16} /></button></div></div></div>
-      <div className="results-info"><span aria-live="polite">{filtered.length} {filtered.length === 1 ? 'button' : 'buttons'} to play with</span><span><MousePointer2 size={12} /> Hover, click, hold. See what happens.</span></div>
-      <div className={`gallery ${layout}`} key={reset}>{filtered.map((demo, index) => <article className="button-card" key={demo.id}><div className={`stage ${demo.stage}`}><span className="demo-number">{String(demos.indexOf(demo) + 1).padStart(2, '0')}</span><button className={`save-button ${saved.includes(demo.id) ? 'is-saved' : ''}`} aria-label={`${saved.includes(demo.id) ? 'Unsave' : 'Save'} ${demo.name}`} aria-pressed={saved.includes(demo.id)} onClick={() => toggleSaved(demo.id)}><Heart size={15} fill={saved.includes(demo.id) ? 'currentColor' : 'none'} /></button><demo.Component /></div><div className="card-info"><div><h3>{demo.name}</h3><p>{demo.feel}</p></div><button className="code-button" onClick={() => setInspected(demo)} aria-label={`View code for ${demo.name}`}><Code2 size={16} /><span>Code</span></button></div><span className="sr-only">Result {index + 1}</span></article>)}</div>
-      {!filtered.length && <div className="empty-state"><Search size={28} /><h3>{showSaved && !saved.length ? 'Keep a little inspiration.' : 'No buttons found.'}</h3><p>{showSaved && !saved.length ? 'Tap the heart on any button to save it here.' : 'Try a different search or explore another category.'}</p><button onClick={() => { setQuery(''); setCategory('All buttons'); setShowSaved(false) }}><ArrowLeft size={15} /> Back to the collection</button></div>}
-      <div className="collection-end"><span className="end-line" /><span><Sparkles size={14} /> {query || category !== 'All buttons' || showSaved ? 'Every click has a little character.' : 'Good design is a feeling. Sometimes it’s a button.'}</span><span className="end-line" /></div>
-      <aside className="bottom-note"><div className="note-icon"><Code2 size={22} /></div><div><h3>Found something that clicks?</h3><p>Every button is built with React & CSS. Peek under the hood and make it yours.</p></div><a href="https://github.com/callsopp-figma/button-gallery" target="_blank" rel="noreferrer">Explore the source <ArrowRight size={15} /></a></aside>
+    const onKeyDown = (event: KeyboardEvent) => handleKey(event.key.toUpperCase())
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [handleKey])
+
+  function newGame() {
+    const available = WORDS.filter((word) => word !== answer)
+    setAnswer(available[Math.floor(Math.random() * available.length)])
+    setGuesses([])
+    setCurrent('')
+    setMessage('A fresh word is ready.')
+  }
+
+  return (
+    <main className="app-shell">
+      <header className="topbar">
+        <div className="brand">
+          <span className="brand-mark" aria-hidden="true">
+            W
+          </span>
+          <span className="brand-name">WORDLY</span>
+        </div>
+        <div className="header-actions">
+          <AppButton className="icon-button" label="How to play" onClick={() => setShowHelp(true)}>
+            <Icon name="help" />
+          </AppButton>
+          <AppButton className="new-game" onClick={newGame}>
+            <Icon name="refresh" />
+            New word
+          </AppButton>
+        </div>
+      </header>
+
+      <section className="game">
+        <div className="eyebrow">DAILY WORD PUZZLE</div>
+        <div className="title">Find the word</div>
+        <div className="subtitle" aria-live="polite">
+          {message}
+        </div>
+
+        <div className="board" aria-label="Word grid">
+          {Array.from({ length: MAX_GUESSES }, (_, rowIndex) => {
+            const guess = guesses[rowIndex] || (rowIndex === guesses.length ? current : '')
+            const states = guesses[rowIndex]
+              ? scoreGuess(guesses[rowIndex], answer)
+              : Array(5).fill('empty')
+            return (
+              <div className="row" key={rowIndex}>
+                {Array.from({ length: 5 }, (_, cellIndex) => (
+                  <div
+                    className={`tile ${states[cellIndex]} ${guess[cellIndex] ? 'filled' : ''}`}
+                    key={cellIndex}
+                    style={{ animationDelay: `${cellIndex * 90}ms` }}
+                  >
+                    {guess[cellIndex] || ''}
+                  </div>
+                ))}
+              </div>
+            )
+          })}
+        </div>
+
+        <div className="legend" aria-label="Color key">
+          <span><i className="dot correct" />Right spot</span>
+          <span><i className="dot present" />In the word</span>
+          <span><i className="dot absent" />Not in word</span>
+        </div>
+
+        <div className="keyboard" aria-label="On-screen keyboard">
+          {KEY_ROWS.map((row, rowIndex) => (
+            <div className="key-row" key={row}>
+              {rowIndex === 2 && (
+                <AppButton className="key key-wide" onClick={() => handleKey('ENTER')}>
+                  Enter
+                </AppButton>
+              )}
+              {row.split('').map((letter) => (
+                <AppButton
+                  className={`key ${keyStates[letter] || ''}`}
+                  key={letter}
+                  label={`Letter ${letter}`}
+                  onClick={() => handleKey(letter)}
+                >
+                  {letter}
+                </AppButton>
+              ))}
+              {rowIndex === 2 && (
+                <AppButton
+                  className="key key-wide delete"
+                  label="Delete letter"
+                  onClick={() => handleKey('BACKSPACE')}
+                >
+                  Delete
+                </AppButton>
+              )}
+            </div>
+          ))}
+        </div>
       </section>
+
+      <footer>One word. Six tries. A new ritual for your day.</footer>
+
+      {showHelp && (
+        <div className="modal-backdrop" role="presentation" onMouseDown={() => setShowHelp(false)}>
+          <div
+            aria-label="How to play"
+            aria-modal="true"
+            className="modal"
+            role="dialog"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <div className="modal-kicker">HOW TO PLAY</div>
+            <div className="modal-title">Guess the word in 6 tries</div>
+            <p>Each guess must be five letters. The color of each tile reveals how close you are.</p>
+            <div className="example">
+              <span className="mini correct">W</span>
+              <span>W is in the word and in the right spot.</span>
+            </div>
+            <div className="example">
+              <span className="mini present">O</span>
+              <span>O is in the word, but in another spot.</span>
+            </div>
+            <AppButton className="modal-button" onClick={() => setShowHelp(false)}>
+              Start playing
+            </AppButton>
+          </div>
+        </div>
+      )}
     </main>
-    <footer><a className="footer-brand" href="#"><MousePointer2 size={14} /> button gallery</a><span>Made for the love of the little things.</span><span className="footer-status"><Check size={12} /> React + CSS + a little curiosity</span></footer>
-    {inspected && <Inspector key={inspected.id} demo={inspected} close={() => setInspected(null)} />}
-  </div>
+  )
 }
