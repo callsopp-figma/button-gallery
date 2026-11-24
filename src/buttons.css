@@ -141,3 +141,10 @@
 .minimal > span { transition: transform .3s; font-size: 20px; }
 .minimal:hover > span { transform: translate(3px,-3px); }
 /* @end */
+
+/* @demo red */
+.red { padding: 10px 20px; border-radius: 8px; background: #dc2626; color: #fff; font-weight: 600; box-shadow: 0 1px 2px #0000000d; transition: background-color .2s; }
+.red:hover { background: #b91c1c; }
+.red:focus-visible { outline: 2px solid #dc2626; outline-offset: 2px; }
+.red:active { background: #991b1b; }
+/* @end */

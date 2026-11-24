@@ -23,6 +23,7 @@ export const demos = [
   { id: 'tactile', name: 'Power trip', category: 'Utility', feel: 'Hardware · Toggle', stage: 'gray', Component: Buttons.Tactile },
   { id: 'gradient', name: 'A brighter idea', category: 'Playful', feel: 'Gradient · Color shift', stage: 'pink', Component: Buttons.Gradient },
   { id: 'minimal', name: 'Quietly confident', category: 'Minimal', feel: 'Understated · Underline', stage: 'sage', Component: Buttons.Minimal },
+  { id: 'red', name: 'The red button', category: 'Minimal', feel: 'Bold · Straightforward', stage: 'cream', Component: Buttons.Red },
 ] as const
 export type Demo = typeof demos[number]
 export function getSource(id: string) {
