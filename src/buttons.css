@@ -5,6 +5,12 @@
 .demo-button span { position: relative; }
 /* @end */
 
+/* @demo red */
+.red { border-radius: 8px; color: #fff; background: #dc2626; box-shadow: 0 2px 3px #7f1d1d24; font-weight: 600; }
+.red:hover { background: #b91c1c; box-shadow: 0 5px 12px #7f1d1d30; transform: translateY(-2px); }
+.red:active { background: #991b1b; transform: translateY(1px); }
+/* @end */
+
 /* @demo classic */
 .classic { border-radius: 8px; color: #fff; background: #293c30; box-shadow: 0 2px 2px #24382b12; }
 .classic:hover { background: #3b5341; box-shadow: 0 5px 12px #24382b20; transform: translateY(-2px); }

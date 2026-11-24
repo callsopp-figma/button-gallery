@@ -6,10 +6,10 @@ import { Hold, Like, Loading, Split, Toggle } from './Buttons'
 import { demos, getSource } from './catalog'
 
 describe('gallery workflows', () => {
-  it('shows all 18 demos, combines category and search, and clears an empty result', async () => {
+  it('shows all 19 demos, combines category and search, and clears an empty result', async () => {
     const user = userEvent.setup()
     render(<App />)
-    expect(screen.getAllByRole('article')).toHaveLength(18)
+    expect(screen.getAllByRole('article')).toHaveLength(19)
     await user.click(screen.getByRole('button', { name: 'Motion' }))
     expect(screen.getAllByRole('article')).toHaveLength(5)
     await user.type(screen.getByRole('textbox', { name: 'Search buttons' }), 'ripple')
@@ -18,7 +18,7 @@ describe('gallery workflows', () => {
     await user.type(screen.getByRole('textbox'), 'no matches')
     expect(screen.queryAllByRole('article')).toHaveLength(0)
     await user.click(screen.getByRole('button', { name: 'Back to the collection' }))
-    expect(screen.getAllByRole('article')).toHaveLength(18)
+    expect(screen.getAllByRole('article')).toHaveLength(19)
   })
 
   it('persists saved favorites across remounts and removes them', async () => {

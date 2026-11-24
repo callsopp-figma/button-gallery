@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 
+// @demo red
+export function Red() {
+  return <button type="button" className="demo-button red">Button</button>
+}
+// @end
+
 // @demo classic
 export function Classic() {
   const [done, setDone] = useState(false)
